@@ -1,0 +1,555 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
+    --red: #D85A30; --red-light: #FAECE7; --amber: #BA7517; --amber-light: #FAEEDA;
+    --navy: #042C53; --blue: #378ADD; --blue-light: #E6F1FB;
+    --gray-bg: #F1EFE8; --gray-mid: #888780; --gray-dark: #2C2C2A;
+  }
+  body { font-family: var(--font-sans, sans-serif); background: transparent; color: var(--color-text-primary); }
+
+  .app { max-width: 700px; margin: 0 auto; padding: 1rem 0 3rem; }
+
+  /* NAV */
+  .nav { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border-tertiary); margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 0; }
+  .nav button { background: none; border: none; padding: 8px 14px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all .15s; }
+  .nav button.active { color: var(--green); border-bottom-color: var(--green); font-weight: 500; }
+  .nav button:hover:not(.active) { color: var(--color-text-primary); }
+
+  /* PAGES */
+  .page { display: none; } .page.active { display: block; }
+
+  /* SECTION */
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: .06em; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 8px; margin-top: 1.5rem; }
+  .section-label:first-child { margin-top: 0; }
+
+  /* CARDS */
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg, 12px); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .card-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .card-title { font-size: 15px; font-weight: 500; }
+  .card-sub { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+
+  /* BADGE */
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+  .badge-green { background: var(--green-light); color: var(--green-dark); }
+  .badge-red { background: var(--red-light); color: #4A1B0C; }
+  .badge-amber { background: var(--amber-light); color: #412402; }
+  .badge-blue { background: var(--blue-light); color: var(--navy); }
+  .badge-gray { background: var(--gray-bg); color: var(--gray-dark); }
+
+  /* INPUTS */
+  input[type=text], input[type=number], select {
+    width: 100%; padding: 8px 10px; font-size: 14px; border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md, 8px); background: var(--color-background-primary);
+    color: var(--color-text-primary); outline: none;
+  }
+  input:focus, select:focus { box-shadow: 0 0 0 2px rgba(29,158,117,.25); border-color: var(--green); }
+
+  /* BUTTONS */
+  .btn { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md, 8px); padding: 7px 14px; font-size: 13px; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-primary); transition: background .12s; }
+  .btn:hover { background: var(--color-background-secondary); }
+  .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-red { background: var(--red); color: #fff; border-color: var(--red); }
+  .btn-red:hover { background: #993C1D; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* HERO BANNER */
+  .hero { border-radius: var(--border-radius-lg, 12px); background: var(--green); color: #fff; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .hero-icon { font-size: 40px; line-height: 1; }
+  .hero h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+  .hero p { font-size: 13px; opacity: .8; }
+
+  /* PUNISHMENT SCALE */
+  .punish-scale { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .punish-card { border-radius: var(--border-radius-lg, 12px); padding: 1rem; text-align: center; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+  .punish-card .icon { font-size: 28px; margin-bottom: 6px; }
+  .punish-card .label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+  .punish-card .value { font-size: 20px; font-weight: 500; margin-top: 2px; }
+
+  /* PLAYER LIST */
+  .player-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .player-item:last-child { border-bottom: none; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .player-info { flex: 1; min-width: 0; }
+  .player-name { font-size: 14px; font-weight: 500; }
+  .player-team { font-size: 12px; color: var(--color-text-secondary); }
+  .player-actions { display: flex; gap: 6px; }
+
+  /* PUNISHMENT LOG */
+  .log-item { padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; justify-content: space-between; align-items: center; }
+  .log-item:last-child { border-bottom: none; }
+
+  /* STANDINGS */
+  .standing-row { display: grid; grid-template-columns: 28px 1fr 40px 40px 40px 70px; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .standing-row:last-child { border-bottom: none; }
+  .standing-header { color: var(--color-text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; font-weight: 500; }
+  .standing-pos { font-weight: 500; text-align: center; }
+  .standing-pts { font-weight: 500; text-align: center; color: var(--green); }
+  .col-c { text-align: center; }
+
+  /* RULES */
+  .rule-block { padding: 1rem 1.25rem; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg, 12px); margin-bottom: 10px; }
+  .rule-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); margin-bottom: 4px; }
+  .rule-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .rule-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+
+  /* TEAMS GRID */
+  .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .team-chip { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md, 8px); padding: 8px 10px; font-size: 13px; cursor: pointer; background: var(--color-background-primary); transition: all .12s; display: flex; align-items: center; gap: 6px; }
+  .team-chip:hover { background: var(--color-background-secondary); }
+  .team-chip.selected { background: var(--green-light); border-color: var(--green); color: var(--green-dark); font-weight: 500; }
+  .team-chip.taken { opacity: .4; cursor: default; pointer-events: none; }
+
+  /* FORM GROUP */
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 5px; display: block; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 2rem; color: var(--color-text-secondary); font-size: 14px; }
+
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1rem 0; }
+
+  .alert { border-radius: var(--border-radius-md, 8px); padding: 10px 14px; font-size: 13px; margin-bottom: 12px; }
+  .alert-amber { background: var(--amber-light); color: #412402; }
+  .alert-green { background: var(--green-light); color: var(--green-dark); }
+</style>
+
+<div class="app">
+  <div class="hero">
+    <div class="hero-icon">⚽</div>
+    <div>
+      <h1>Fantasy World Cup 2026</h1>
+      <p>Commissioner Hub — manage players, picks, punishments & standings</p>
+    </div>
+  </div>
+
+  <div class="nav" id="nav">
+    <button class="active" onclick="goPage('home')">Home</button>
+    <button onclick="goPage('players')">Players</button>
+    <button onclick="goPage('picks')">Team Picks</button>
+    <button onclick="goPage('standings')">Standings</button>
+    <button onclick="goPage('punishments')">Punishments</button>
+    <button onclick="goPage('rules')">Rules</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="section-label">Punishment scale</div>
+    <div class="punish-scale">
+      <div class="punish-card">
+        <div class="icon">💸</div>
+        <div class="label">Money</div>
+        <div class="value" style="color:var(--red)">$20</div>
+      </div>
+      <div class="punish-card">
+        <div class="icon">🥃</div>
+        <div class="label">Shots</div>
+        <div class="value" style="color:var(--amber)">20</div>
+      </div>
+      <div class="punish-card">
+        <div class="icon">💪</div>
+        <div class="label">Push-ups</div>
+        <div class="value" style="color:var(--green)">300</div>
+      </div>
+    </div>
+
+    <div class="section-label">Quick stats</div>
+    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:1.5rem;">
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;text-align:center;">
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Players</div>
+        <div style="font-size:22px;font-weight:500;" id="stat-players">0</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;text-align:center;">
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Teams picked</div>
+        <div style="font-size:22px;font-weight:500;" id="stat-teams">0</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;text-align:center;">
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Punishments</div>
+        <div style="font-size:22px;font-weight:500;" id="stat-punish">0</div>
+      </div>
+    </div>
+
+    <div class="section-label">How it works</div>
+    <div class="card">
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.8;">
+        <div style="margin-bottom:6px;"><span style="font-weight:500;color:var(--color-text-primary);">1. Register players</span> — Each person joins and picks a World Cup team (no duplicates).</div>
+        <div style="margin-bottom:6px;"><span style="font-weight:500;color:var(--color-text-primary);">2. Earn points</span> — Points accumulate based on your team's results (see Rules).</div>
+        <div style="margin-bottom:6px;"><span style="font-weight:500;color:var(--color-text-primary);">3. Losers pay up</span> — Bottom players owe punishment. Everyone picks their poison: $20, 20 shots, or 300 push-ups.</div>
+        <div><span style="font-weight:500;color:var(--color-text-primary);">4. Commissioner controls</span> — Use this hub to track everything and issue punishments.</div>
+      </div>
+    </div>
+
+    <div class="section-label">Tournament dates</div>
+    <div class="card">
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:2;">
+        <div>🗓 Group stage — <span style="color:var(--color-text-primary);font-weight:500;">June 11 – July 2, 2026</span></div>
+        <div>⚔️ Round of 32 — <span style="color:var(--color-text-primary);font-weight:500;">July 4 – 9, 2026</span></div>
+        <div>🏆 Knockout rounds — <span style="color:var(--color-text-primary);font-weight:500;">July 10 – August 3, 2026</span></div>
+        <div>🌟 Final — <span style="color:var(--color-text-primary);font-weight:500;">August 3, 2026 · MetLife Stadium</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYERS -->
+  <div class="page" id="page-players">
+    <div class="section-label">Add player</div>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" id="add-name" placeholder="e.g. Mike" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Punishment preference</label>
+        <select id="add-punish">
+          <option value="money">💸 $20 cash</option>
+          <option value="shots">🥃 20 shots</option>
+          <option value="pushups">💪 300 push-ups</option>
+        </select>
+      </div>
+      <button class="btn btn-green" onclick="addPlayer()" style="width:100%;margin-top:4px;">Add player</button>
+    </div>
+
+    <div class="section-label">Roster (<span id="roster-count">0</span>/15)</div>
+    <div class="card" id="player-list">
+      <div class="empty">No players yet — add some above</div>
+    </div>
+  </div>
+
+  <!-- PICKS -->
+  <div class="page" id="page-picks">
+    <div class="section-label">Assign team picks</div>
+    <div class="alert alert-amber">Each nation can only be picked once. First come, first served!</div>
+    <div class="form-group" style="margin-bottom:1rem;">
+      <label class="form-label">Pick for player</label>
+      <select id="pick-player-sel">
+        <option value="">— choose player —</option>
+      </select>
+    </div>
+    <div class="section-label">World Cup 2026 nations (48 teams)</div>
+    <div class="teams-grid" id="teams-grid"></div>
+  </div>
+
+  <!-- STANDINGS -->
+  <div class="page" id="page-standings">
+    <div class="section-label">Current standings</div>
+    <div class="alert alert-amber" style="margin-bottom:1rem;">Update points manually as your team's country progresses in the tournament.</div>
+    <div class="card">
+      <div class="standing-row standing-header">
+        <div></div><div>Player</div><div class="col-c">Pts</div><div class="col-c">W</div><div class="col-c">GF</div><div class="col-c">Status</div>
+      </div>
+      <div id="standings-list"><div class="empty">Add players to see standings</div></div>
+    </div>
+    <div class="section-label" style="margin-top:1rem;">Update points</div>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Player</label>
+        <select id="pts-player"></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label class="form-label">Add points</label>
+          <input type="number" id="pts-add" placeholder="e.g. 3" min="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Wins</label>
+          <input type="number" id="pts-wins" placeholder="e.g. 1" min="0" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goals for (cumulative total)</label>
+        <input type="number" id="pts-gf" placeholder="e.g. 5" min="0" />
+      </div>
+      <button class="btn btn-green" onclick="updatePoints()" style="width:100%;">Update</button>
+    </div>
+  </div>
+
+  <!-- PUNISHMENTS -->
+  <div class="page" id="page-punishments">
+    <div class="section-label">Issue punishment</div>
+    <div class="punish-scale" style="margin-bottom:1rem;">
+      <div class="punish-card"><div class="icon">💸</div><div class="label">Money</div><div class="value" style="color:var(--red)">$20</div></div>
+      <div class="punish-card"><div class="icon">🥃</div><div class="label">Shots</div><div class="value" style="color:var(--amber)">20</div></div>
+      <div class="punish-card"><div class="icon">💪</div><div class="label">Push-ups</div><div class="value" style="color:var(--green)">300</div></div>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Player</label>
+        <select id="punish-player"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <input type="text" id="punish-reason" placeholder="e.g. Finished last in group stage" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Override punishment type (optional — defaults to their preference)</label>
+        <select id="punish-override">
+          <option value="">Use player's preference</option>
+          <option value="money">💸 $20 cash</option>
+          <option value="shots">🥃 20 shots</option>
+          <option value="pushups">💪 300 push-ups</option>
+        </select>
+      </div>
+      <button class="btn btn-red" onclick="issuePunishment()" style="width:100%;">Issue punishment</button>
+    </div>
+
+    <div class="section-label">Punishment log</div>
+    <div class="card" id="punish-log">
+      <div class="empty">No punishments issued yet — behave yourselves</div>
+    </div>
+  </div>
+
+  <!-- RULES -->
+  <div class="page" id="page-rules">
+    <div class="section-label">Scoring system</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:1rem;">
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--green);">+3</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Group stage win</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--amber);">+1</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Group stage draw</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--green);">+5</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Round of 32 win</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--green);">+8</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Round of 16 win</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--green);">+12</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Quarter-final win</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--green);">+16</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Semi-final win</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--green);">+20</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Final win (champion)</div>
+      </div>
+      <div class="card" style="text-align:center;padding:.75rem;">
+        <div style="font-size:20px;font-weight:500;color:var(--blue);">+1</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Per goal scored</div>
+      </div>
+    </div>
+
+    <div class="section-label">Official rules</div>
+
+    <div class="rule-block">
+      <div class="rule-num">Rule 01</div>
+      <div class="rule-title">One team per player</div>
+      <div class="rule-desc">Each participant picks exactly one World Cup nation. No two players can pick the same country. Picks are first-come, first-served and locked once confirmed by the commissioner.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 02</div>
+      <div class="rule-title">Pick deadline</div>
+      <div class="rule-desc">All picks must be submitted before June 11, 2026 (kickoff of the first match). Late picks will be assigned a random remaining nation by the commissioner.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 03</div>
+      <div class="rule-title">Punishment scale is equal</div>
+      <div class="rule-desc">$20 cash, 20 shots, and 300 push-ups are treated as equivalent punishment tiers. Each player chooses their punishment type when registering. This cannot be changed after the tournament begins.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 04</div>
+      <div class="rule-title">Who pays up</div>
+      <div class="rule-desc">The bottom player(s) in the final standings pay a full punishment. If multiple players tie for last, they all pay. The commissioner has final say on tiebreakers (goals for, then head-to-head nation performance).</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 05</div>
+      <div class="rule-title">Tiebreaker order</div>
+      <div class="rule-desc">Ties are broken in this order: (1) total goals scored by your nation, (2) tournament stage reached, (3) coin flip by the commissioner if still tied.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 06</div>
+      <div class="rule-title">Shots rule (if applicable)</div>
+      <div class="rule-desc">Shots must be consumed in a single session within 1 week of the final. Designated driver and non-drinker alternatives: 20 non-alcoholic shots (pickle juice, hot sauce, etc.) — commissioner decides. No skipping.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 07</div>
+      <div class="rule-title">Push-ups rule (if applicable)</div>
+      <div class="rule-desc">300 push-ups must be completed in one session, witnessed by at least two other players. Rest between sets is allowed. Breaks longer than 5 minutes reset the current set. No partial credit.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 08</div>
+      <div class="rule-title">Commissioner is final arbiter</div>
+      <div class="rule-desc">All disputes, edge cases, and complaints go to the commissioner. The commissioner's ruling is final and non-negotiable. Bribery is encouraged but not guaranteed to work.</div>
+    </div>
+    <div class="rule-block">
+      <div class="rule-num">Rule 09</div>
+      <div class="rule-title">Have fun</div>
+      <div class="rule-desc">This is a friendly league. No actual gambling is sanctioned. Keep it light, pay your debts with good humour, and enjoy the beautiful game.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEAMS = [
+  "Argentina 🇦🇷","Brazil 🇧🇷","France 🇫🇷","England 🇬🇧","Spain 🇪🇸","Germany 🇩🇪","Portugal 🇵🇹","Netherlands 🇳🇱",
+  "Belgium 🇧🇪","Uruguay 🇺🇾","Mexico 🇲🇽","USA 🇺🇸","Canada 🇨🇦","Japan 🇯🇵","Morocco 🇲🇦","Croatia 🇭🇷",
+  "Senegal 🇸🇳","Denmark 🇩🇰","Switzerland 🇨🇭","Australia 🇦🇺","South Korea 🇰🇷","Poland 🇵🇱","Colombia 🇨🇴","Ecuador 🇪🇨",
+  "Iran 🇮🇷","Saudi Arabia 🇸🇦","Tunisia 🇹🇳","Cameroon 🇨🇲","Ghana 🇬🇭","Nigeria 🇳🇬","Egypt 🇪🇬","Ivory Coast 🇨🇮",
+  "Serbia 🇷🇸","Austria 🇦🇹","Ukraine 🇺🇦","Turkey 🇹🇷","Greece 🇬🇷","Hungary 🇭🇺","Czech Republic 🇨🇿","Slovakia 🇸🇰",
+  "Chile 🇨🇱","Peru 🇵🇪","Venezuela 🇻🇪","Bolivia 🇧🇴","Paraguay 🇵🇾","New Zealand 🇳🇿","Jamaica 🇯🇲","Panama 🇵🇦"
+];
+const PUNISH_LABEL = { money:'💸 $20 cash', shots:'🥃 20 shots', pushups:'💪 300 push-ups' };
+const AVATAR_COLORS = ['#1D9E75','#378ADD','#D85A30','#BA7517','#D4537E','#534AB7','#639922'];
+
+let players = [], punishments = [];
+
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach((b,i)=>{
+    b.classList.remove('active');
+    if(['home','players','picks','standings','punishments','rules'][i]===id) b.classList.add('active');
+  });
+  document.getElementById('page-'+id).classList.add('active');
+  if(id==='picks') renderTeams();
+  if(id==='standings') renderStandings();
+  if(id==='punishments'||id==='standings'||id==='picks') refreshSelects();
+  updateStats();
+}
+
+function initials(name) { return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function avatarColor(i) { return AVATAR_COLORS[i % AVATAR_COLORS.length]; }
+
+function addPlayer() {
+  const name = document.getElementById('add-name').value.trim();
+  const punish = document.getElementById('add-punish').value;
+  if(!name) return alert('Enter a name');
+  if(players.length>=15) return alert('Max 15 players');
+  if(players.find(p=>p.name.toLowerCase()===name.toLowerCase())) return alert('Name already taken');
+  players.push({ id: Date.now(), name, punish, team:null, pts:0, wins:0, gf:0 });
+  document.getElementById('add-name').value='';
+  renderPlayers(); refreshSelects(); updateStats();
+}
+
+function removePlayer(id) {
+  players = players.filter(p=>p.id!==id);
+  renderPlayers(); refreshSelects(); renderStandings(); renderTeams(); updateStats();
+}
+
+function renderPlayers() {
+  const el = document.getElementById('player-list');
+  document.getElementById('roster-count').textContent = players.length;
+  if(!players.length) { el.innerHTML='<div class="empty">No players yet — add some above</div>'; return; }
+  el.innerHTML = players.map((p,i)=>`
+    <div class="player-item">
+      <div class="avatar" style="background:${avatarColor(i)};color:#fff">${initials(p.name)}</div>
+      <div class="player-info">
+        <div class="player-name">${p.name}</div>
+        <div class="player-team">${p.team||'No team picked'} &middot; ${PUNISH_LABEL[p.punish]}</div>
+      </div>
+      <div class="player-actions">
+        <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="removePlayer(${p.id})">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function takenTeams() { return players.filter(p=>p.team).map(p=>p.team); }
+
+function renderTeams() {
+  const taken = takenTeams();
+  const selPlayer = document.getElementById('pick-player-sel').value;
+  const grid = document.getElementById('teams-grid');
+  grid.innerHTML = TEAMS.map(t=>{
+    const isTaken = taken.includes(t);
+    const me = players.find(p=>p.team===t);
+    const cls = me && selPlayer && me.id==selPlayer ? 'selected' : isTaken ? 'taken' : '';
+    return `<div class="team-chip ${cls}" onclick="pickTeam('${t}')">${t}${isTaken&&me?'<span style="font-size:10px;margin-left:auto;opacity:.7">${me.name.split(' ')[0]}</span>':''}</div>`;
+  }).join('');
+}
+
+function pickTeam(team) {
+  const pid = parseInt(document.getElementById('pick-player-sel').value);
+  if(!pid) return alert('Select a player first');
+  const taken = takenTeams();
+  if(taken.includes(team)) return alert('That nation is already taken');
+  const p = players.find(x=>x.id===pid);
+  if(p) { p.team = team; renderTeams(); renderPlayers(); renderStandings(); }
+}
+
+function refreshSelects() {
+  const ids = ['pick-player-sel','pts-player','punish-player'];
+  ids.forEach(id=>{
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const val = sel.value;
+    sel.innerHTML = (id==='pick-player-sel'?'<option value="">— choose player —</option>':'') +
+      players.map(p=>`<option value="${p.id}">${p.name}${p.team?' ('+p.team+')':''}</option>`).join('');
+    if(val) sel.value=val;
+  });
+}
+
+function renderStandings() {
+  const el = document.getElementById('standings-list');
+  if(!players.length) { el.innerHTML='<div class="empty">Add players to see standings</div>'; return; }
+  const sorted = [...players].sort((a,b)=>b.pts-a.pts||b.wins-a.wins||b.gf-a.gf);
+  const lastPts = sorted[sorted.length-1].pts;
+  el.innerHTML = sorted.map((p,i)=>{
+    const isLast = p.pts===lastPts && p.pts===sorted[sorted.length-1].pts;
+    const badge = i===0 ? '<span class="badge badge-green">Leader</span>' : isLast && sorted.length>1 ? '<span class="badge badge-red">Pay up</span>' : '';
+    return `<div class="standing-row">
+      <div class="standing-pos" style="color:${i===0?'var(--green)':'var(--color-text-secondary)'}">${i+1}</div>
+      <div style="font-size:13px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}<div style="font-size:11px;color:var(--color-text-secondary);font-weight:400">${p.team||'—'}</div></div>
+      <div class="standing-pts">${p.pts}</div>
+      <div class="col-c" style="font-size:13px">${p.wins}</div>
+      <div class="col-c" style="font-size:13px">${p.gf}</div>
+      <div>${badge}</div>
+    </div>`;
+  }).join('');
+}
+
+function updatePoints() {
+  const pid = parseInt(document.getElementById('pts-player').value);
+  const add = parseInt(document.getElementById('pts-add').value)||0;
+  const wins = parseInt(document.getElementById('pts-wins').value)||0;
+  const gf = parseInt(document.getElementById('pts-gf').value)||0;
+  const p = players.find(x=>x.id===pid);
+  if(!p) return;
+  p.pts += add; p.wins += wins; if(gf>0) p.gf = gf;
+  document.getElementById('pts-add').value='';
+  document.getElementById('pts-wins').value='';
+  document.getElementById('pts-gf').value='';
+  renderStandings();
+}
+
+function issuePunishment() {
+  const pid = parseInt(document.getElementById('punish-player').value);
+  const reason = document.getElementById('punish-reason').value.trim()||'No reason given';
+  const override = document.getElementById('punish-override').value;
+  const p = players.find(x=>x.id===pid);
+  if(!p) return alert('Select a player');
+  const type = override||p.punish;
+  punishments.unshift({ player: p.name, reason, type, date: new Date().toLocaleDateString() });
+  document.getElementById('punish-reason').value='';
+  document.getElementById('punish-override').value='';
+  renderPunishLog(); updateStats();
+}
+
+function renderPunishLog() {
+  const el = document.getElementById('punish-log');
+  if(!punishments.length) { el.innerHTML='<div class="empty">No punishments issued yet — behave yourselves</div>'; return; }
+  el.innerHTML = punishments.map(p=>`
+    <div class="log-item">
+      <div>
+        <div style="font-size:14px;font-weight:500;">${p.player}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">${p.reason} &middot; ${p.date}</div>
+      </div>
+      <span class="badge ${p.type==='money'?'badge-red':p.type==='shots'?'badge-amber':'badge-green'}">${PUNISH_LABEL[p.type]}</span>
+    </div>`).join('');
+}
+
+function updateStats() {
+  document.getElementById('stat-players').textContent = players.length;
+  document.getElementById('stat-teams').textContent = players.filter(p=>p.team).length;
+  document.getElementById('stat-punish').textContent = punishments.length;
+}
+</script>

@@ -858,6 +858,7 @@ function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().sli
 function addPlayer(){
   const name=document.getElementById('add-name').value.trim();
   if(!name)return alert('Enter a name');
+  if(new Date()>new Date('2026-06-16T23:59:59'))return alert('Registration closed — the tournament is underway!');
   if(players.length>=15)return alert('Max 15 players');
   if(players.find(p=>p.name.toLowerCase()===name.toLowerCase()))return alert('Name already taken');
   const mix=getMix('add'),id='p_'+Date.now();

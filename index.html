@@ -986,7 +986,7 @@ function issuePunishment(){
   const reason=document.getElementById('punish-reason').value.trim()||'No reason given';
   const p=players.find(x=>x.id===pid);if(!p)return alert('Select a player');
   const mix=p.mix||{money:20,shots:0,pushups:0};
-  db.ref('fwc2026/punishments').push({player:p.name,reason,money:mix.money,shots:mix.shots,pushups:mix.pushups,date:new Date().toLocaleDateString(),ts:Date.now()});
+  db.ref('fwc2026/punishments').push({player:p.name,reason,money:mix.money,shots:mix.shots,pushups:mix.pushups,date:new Date().toLocaleDateString(),ts:Date.now()}); db.ref('fwc2026/players/'+pid+'/eliminated').set(true);
   document.getElementById('punish-reason').value='';
   toast('🔴 Punishment issued to '+p.name+'!');
 }
